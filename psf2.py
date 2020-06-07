@@ -1,6 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy import signal
+from scipy import signal, misc, ndimage
+from scipy.ndimage import filters
+from skimage import draw
+import matplotlib.pyplot as plt
 
 
 class Error(Exception):
@@ -33,24 +36,48 @@ def generate_gaussian_kernel_fast(size, sigma, normalised=False):
         gaussian2D /= (2 * np.pi * (sigma ** 2))
     return gaussian2D
 
-# a = np.linspace(-1, 1, 10)
-# b = np.linspace(-1, 1, 10)
-# x, y = np.meshgrid(a,b)
-# d = np.sqrt(x*x+y*y)
-# sigma, mu = 1.0, 0.0
-# g = np.exp(-( (d-mu)**2 / ( 2.0 * sigma**2 ) ) )
 
-gkern1 = generate_gaussian_kernel_fast(50, 1, False)
-plt.imshow(gkern1, interpolation='none')
-plt.title('gkern1')
-plt.show()
+def mask_conv(img, kernel, mask):
+    filtered = filters.convolve(img, kernel)
+    return np.where(mask, filtered, img)
 
-gkern2 = generate_gaussian_kernel_fast(50, 2, False)
-plt.imshow(gkern2, interpolation='none')
-plt.title('gkern2')
-plt.show()
 
-gkern3 = generate_gaussian_kernel_fast(50, 3, False)
-plt.imshow(gkern3, interpolation='none')
-plt.title('gkern3')
-plt.show()
+def blur(image, kernel_size, sigma, location, radius):
+
+    # Generate a matrix with the same size as the input image. Fill it with value:False
+    mask = np.zeros_like(image, dtype=np.bool)
+
+    # Generate coordinates for a circle at a given location & radius
+    y, x = location[0], location[1]
+    cir = draw.circle(x, y, radius)
+
+    # Wherever the circle is, replace the mask value to true
+    mask[cir] = True
+
+    # Generate a kernel with the given size & standard deviation
+    kernel = generate_gaussian_kernel_fast(kernel_size, sigma, True)
+
+    # Convolve the kernel over the image through the mask
+    # only the areas set to true will be convolved
+    out = mask_conv(image, kernel, mask)
+
+    return out
+
+
+def show(image):
+    plt.imshow(image)
+    plt.show()
+
+
+original = misc.face(gray=True)
+show(original)
+
+kernel_size = 3
+location = (625, 450)
+radius = 75
+sigma = 1
+
+blurred = blur(original, kernel_size, sigma, location, radius)
+show(blurred)
+
+
