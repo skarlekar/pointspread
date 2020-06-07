@@ -24,23 +24,6 @@ def show(image):
     plt.show()
 
 
-# def crop(image, location, size):
-#     w, h = image.shape
-#     cx1 = location[1]
-#     cy1 = location[0]
-#     cx2 = cx1 + size[1]
-#     cy2 = cy1 + size[0]
-#
-#     if (cx1 > w) or (cx2 > w):
-#         raise InputError("Width overflow")
-#     if (cy1 > h) or (cy2 > h):
-#         raise InputError("Height overflow")
-#
-#     cropped_image = image[cx1:cx2, cy1:cy2]
-#
-#     return cropped_image
-
-
 def blur(image, sigma):
     return ndimage.gaussian_filter(image,sigma=sigma)
 
