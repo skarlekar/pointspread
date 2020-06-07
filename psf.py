@@ -3,18 +3,10 @@ import matplotlib.pyplot as plt
 
 
 class Error(Exception):
-    """Base class for exceptions in this module."""
     pass
 
 
 class InputError(Error):
-    """Exception raised for errors in the input.
-
-    Attributes:
-        expression -- input expression in which the error occurred
-        message -- explanation of the error
-    """
-
     def __init__(self, message):
         self.message = message
 
@@ -30,8 +22,7 @@ def blur(image, sigma):
 
 def crop(image, location, size):
     h, w = image.shape
-    cx1,cy1 = location
-    # cy1 = location[1]
+    cx1, cy1 = location
     cx2 = cx1 + size[0]
     cy2 = cy1 + size[1]
 
@@ -45,12 +36,26 @@ def crop(image, location, size):
     return cropped_image
 
 
-def paste(base, pasteable, location):
+def oldpaste(base, pasteable, location):
     h, w = pasteable.shape
     x, y = location[0], location[1]
+
     for i in range(x, x + w):
         for j in range(y, y + h):
             base[j, i] = pasteable[j - y, i - x]
+
+
+def paste(base, pasteable, location):
+    bh, bw = base.shape
+    h, w = pasteable.shape
+    x, y = location[0], location[1]
+
+    if (x + w) > bw:
+        raise InputError("Width overflow while performing paste operation")
+    if (y + h) > bh:
+        raise InputError("Height overflow while performing paste operation")
+
+    base[y:y + h, x:x + w] = pasteable
 
 
 original = misc.face(gray=True)
